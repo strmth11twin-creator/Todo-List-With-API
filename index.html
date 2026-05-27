@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="container">
+        <header class="container_header">
+            <h1 class="container_header--title">Мой список задач</h1>
+            <button class="container_header--btn" data-change-btn>🌛</button>
+        </header>
+
+        <div class="container_add">
+            <input type="text" class="container_add--input" placeholder="Добавить новую задачу..." data-add-input>
+            <button class="container_add--btn" data-add-btn>Добавить</button>
+        </div>
+
+        <div class="container_search">
+            <input type="text" class="container_search--input" placeholder="Найти задачу..." data-search-input>
+        </div>
+
+        <div class="container_sections">
+            <nav class="container_sections--navigation">
+                <ul class="navigation_list">
+                    <li class="navigation_list--item">Все <span data-all-count>0</span></li>
+                    <li class="navigation_list--item">Активные <span data-active-count>0</span></li>
+                    <li class="navigation_list--item">Выполненные <span data-completed-count>0</span></li>
+                </ul>
+            </nav>
+
+            <select class="select" data-important-select>
+                <option value="" disabled selected class="option">Выбрать приоритет</option>
+                <option value="Низкий" class="option">Низкий</option>
+                <option value="Средний" class="option">Средний</option>
+                <option value="Высокий" class="option">Высокий</option>
+            </select>
+        </div>
+
+        <div class="container_buttons">
+            <button class="delete-all-btn" data-delete-all-btn>Удалить Все</button>
+            <button class="selected-all-btn" data-selected-all-btn>Отметить Все</button>
+        </div>
+
+        <div class="container-todos" data-container-todos></div>
+    </div>
+
+    <template data-todo-template>
+        <div class="todo">
+            <input type="checkbox" class="todo-checkbox" data-todo-checkbox>
+            <div class="todo-info">
+                <p class="todo-text" data-todo-text>Description</p>
+                <span class="todo-date" data-todo-date></span>
+            </div>
+            <button class="remove-btn" data-remove-btn>🗑️</button>
+        </div>
+    </template>
+</body>
+
+</html>
