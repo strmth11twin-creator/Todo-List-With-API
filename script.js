@@ -172,7 +172,7 @@ function circkl(important) {
 }
 
 function dateRepresentation(newCreatedDate) {
-    return Intl.DateTimeFormat("UZ-uz", {
+    return Intl.DateTimeFormat("uz-UZ", {
         day: "numeric",
         month: "numeric",
         year: "numeric",
