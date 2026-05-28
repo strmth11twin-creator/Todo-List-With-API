@@ -2,87 +2,142 @@ const addInput = document.querySelector("[data-add-input]");
 const addBtn = document.querySelector("[data-add-btn]");
 const containerTodos = document.querySelector("[data-container-todos]");
 const todoTemplate = document.querySelector("[data-todo-template]");
+const body = document.querySelector("[data-body]");
+const changeBtn = document.querySelector("[data-change-btn]");
+const searchInput = document.querySelector("[data-search-input]");
+const navigationList = document.querySelector("[data-navigation-list]");
+const listItem = document.querySelectorAll(".navigation_list--item");
+const todoImportant = document.querySelector("[data-todo-important]");
+const select = document.querySelector("[data-important-select]");
+const allSelectedBtn = document.querySelector("[data-selected-all-btn]");
+const allDeleteBtn = document.querySelector("[data-delete-all-btn]");
 
-let todoList = [];
+const allCount = document.querySelector("[data-all-count]");
+const activeCount = document.querySelector("[data-active-count]");
+const completedCount = document.querySelector("[data-completed-count]");
 
-const MOCK_API = "https://69715bdf78fec16a6300b083.mockapi.io/api/users";
+let todoList = JSON.parse(localStorage.getItem("todos")) || [];
+let filterList = [];
+let current = "all";
 
-async function getTasks() {
-    try {
-        const response = await fetch(MOCK_API);
-
-        if (!response.ok) {
-            throw new Error(`Ошибка ${response.status}`);
-        }
-
-        const data = await response.json();
-        todoList = data;
-
-        render();
-    } catch (error) {
-        console.error("Ошибка при получении задач")
-    }
+if(localStorage.getItem("stage") === "day") {
+    body.classList.remove("dark");
+    changeBtn.textContent = "🌛";
+} else if(localStorage.getItem("stage") === "night") {
+    body.classList.add("dark");
+    changeBtn.textContent = "🌞";
 }
 
-async function updateTask(task, completed) {
-    const response = await fetch(`${MOCK_API}/${task.id}`, {
-        method: "PUT",
-        body: JSON.stringify({ ...task, completed: completed }),
-        headers: {
-            "Content-type": "application/json"
-        }
-    })
-
-    const data = await response.json();
-
-
-}
-
-async function deleteTask(task) {
-    const response = await fetch(`${MOCK_API}/${task.id}`, {
-        method: "DELETE"
-    })
-
-    const data = await response.json();
-
-    todoList = todoList.filter(t => t.id !== data.id);
-
-    render();
-}
-
-async function createNewTask(task) {
-    try {
-        const response = await fetch(MOCK_API, {
-            method: "POST",
-            body: JSON.stringify({
-                text: task,
-                completed: false,
-                createdAt: new Date(),
-            }),
-            headers: {
-                "Content-type": "application/json"
-            }
-        })
-
-        if (!response.ok) {
-            throw new Error(`Ошибка ${response.status}`)
-        }
-
-        const data = await response.json();
-
-        todoList.push(data);
-        render();
-    } catch (error) {
-        console.error("Ошибка при создании новой задачи")
-    }
+function saveToLocalStorage(list) {
+    localStorage.setItem("todos", JSON.stringify(list));
 }
 
 addBtn.addEventListener("click", () => {
-    if (addInput.value.trim()) {
-        createNewTask(addInput.value);
+    if(addInput.value.trim()) {
+        const newTodo = {
+            id: Date.now(),
+            text: addInput.value,
+            completed: false,
+            createdAt: new Date(),
+            important: select.value,
+        }
+
+        todoList.push(newTodo);
         addInput.value = "";
+
+        updateCounts();
+        saveToLocalStorage(todoList);
+        render();
     }
 })
+
+addInput.addEventListener("keydown", (e) => {
+    if(e.key === "Enter") {
+        addBtn.click();
+    }
+})
+
+allSelectedBtn.addEventListener("click", (e) => {
+    const check = todoList.some(t => !t.completed);
+
+    todoList = todoList.map(t => check ? { ...t, completed: true } : { ...t, completed: false });
+
+    updateCounts();
+
+    if (searchInput.value.trim()) {
+        renderAndRenderFilteredTodos(searchInput.value.trim());
+    } else {
+        render();
+    }
+
+    saveToLocalStorage(todoList);
+})
+
+allDeleteBtn.addEventListener("click", (e) => {
+    todoList = todoList.filter(t => !t.completed)
+
+    updateCounts();
+
+    if (searchInput.value.trim()) {
+        renderAndRenderFilteredTodos(searchInput.value.trim());
+    } else {
+        render();
+    }
+
+    saveToLocalStorage(todoList);
+})
+
+changeBtn.addEventListener("click", () => {
+    if (changeBtn.textContent === "🌛") {
+        body.classList.add("dark");
+        changeBtn.textContent = "🌞"
+    } else {
+        body.classList.remove("dark")
+        changeBtn.textContent = "🌛"
+    }
+
+    changeBtn.textContent === "🌛" ? localStorage.setItem("stage", "day") : localStorage.setItem("stage", "night")
+})
+
+function updateCounts() {
+    allCount.textContent = todoList.length;
+    activeCount.textContent = todoList.filter(t => !t.completed).length;
+    completedCount.textContent = todoList.filter(t => t.completed).length;
+}
+
+searchInput.addEventListener("input", (e) => {
+    const searchValue = e.target.value.trim();
+
+    renderAndRenderFilteredTodos(searchValue);
+})
+
+function renderAndRenderFilteredTodos(searchValue) {
+    filterList = todoList.filter(t => t.text.toLowerCase().includes(searchValue.toLowerCase()));
+
+    renderFiltered();
+}
+
+navigationList.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("navigation_list--item")) return;
+
+    listItem.forEach(t => t.classList.remove("active"));
+
+    e.target.classList.add("active");
+
+    current = e.target.dataset.filter
+
+    if (searchInput.value.trim()) {
+        renderAndRenderFilteredTodos(searchInput.value.trim());
+    } else {
+        render();
+    }
+})
+
+function circkl(important) {
+    if (important === "Низкий") return "🟢 Низкий";
+    if (important === "Средний") return "🟡 Средний";
+    if (important === "Высокий") return "🔴 Высокий"
+}
 
 function createdTodoLayout(todo) {
     const todoElement = document.importNode(todoTemplate.content, true);
@@ -99,15 +154,33 @@ function createdTodoLayout(todo) {
     const removeBtn = todoElement.querySelector("[data-remove-btn]");
     removeBtn.disabled = !todo.completed;
 
+    const todoImportant = todoElement.querySelector("[data-todo-important]");
+    todoImportant.textContent = circkl(todo.important);
+
     checkbox.addEventListener("change", (e) => {
         todoList = todoList.map(t => t.id === todo.id ? { ...t, completed: e.target.checked } : t);
 
-        render();
-        updateTask(todo, e.target.checked);
+        updateCounts();
+        saveToLocalStorage(todoList);
+
+        if (searchInput.value.trim()) {
+            renderAndRenderFilteredTodos(searchInput.value.trim());
+        } else {
+            render();
+        }
     })
 
     removeBtn.addEventListener("click", () => {
-        deleteTask(todo);
+        todoList = todoList.filter(t => t.id !== todo.id);
+
+        updateCounts();
+        saveToLocalStorage(todoList);
+
+        if (searchInput.value.trim()) {
+            renderAndRenderFilteredTodos(searchInput.value.trim());
+        } else {
+            render();
+        }
     })
 
     return todoElement;
@@ -115,11 +188,51 @@ function createdTodoLayout(todo) {
 
 function render() {
     containerTodos.innerHTML = "";
-    todoList.forEach(todo => {
+
+    filteredList = todoList;
+
+    if(current === "active") {
+        filteredList = todoList.filter(t => !t.completed);
+    }
+
+    if(current === "completed") {
+        filteredList = todoList.filter(t => t.completed);
+    }
+
+    if(todoList.length === 0) {
+        containerTodos.innerHTML  = "<h3>Нет задач...</h3>"
+    }
+
+    filteredList.forEach(todo => {
         const todoElement = createdTodoLayout(todo);
 
         containerTodos.append(todoElement);
     })
 }
 
-getTasks();
+function renderFiltered() {
+    containerTodos.innerHTML = "";
+
+    filteredList = filterList
+
+    if (current === "active") {
+        filteredList = filterList.filter(t => !t.completed);
+    }
+
+    if (current === "completed") {
+        filteredList = filterList.filter(t => t.completed);
+    }
+
+    if (filterList.length === 0) {
+        containerTodos.innerHTML = "<h3>Нет найденных задач...</h3>"
+    }
+
+    filteredList.forEach(todo => {
+        const todoElement = createdTodoLayout(todo);
+
+        containerTodos.append(todoElement);
+    })
+}
+
+updateCounts();
+render();

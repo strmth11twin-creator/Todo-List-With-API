@@ -9,7 +9,7 @@
     <title>Document</title>
 </head>
 
-<body>
+<body data-body>
     <div class="container">
         <header class="container_header">
             <h1 class="container_header--title">Мой список задач</h1>
@@ -27,10 +27,12 @@
 
         <div class="container_sections">
             <nav class="container_sections--navigation">
-                <ul class="navigation_list">
-                    <li class="navigation_list--item">Все <span data-all-count>0</span></li>
-                    <li class="navigation_list--item">Активные <span data-active-count>0</span></li>
-                    <li class="navigation_list--item">Выполненные <span data-completed-count>0</span></li>
+                <ul class="navigation_list" data-navigation-list>
+                    <li class="navigation_list--item active" data-filter="all">Все <span data-all-count>0</span></li>
+                    <li class="navigation_list--item" data-filter="active">Активные <span data-active-count>0</span>
+                    </li>
+                    <li class="navigation_list--item" data-filter="completed">Выполненные <span
+                            data-completed-count>0</span></li>
                 </ul>
             </nav>
 
@@ -43,8 +45,8 @@
         </div>
 
         <div class="container_buttons">
-            <button class="delete-all-btn" data-delete-all-btn>Удалить Все</button>
             <button class="selected-all-btn" data-selected-all-btn>Отметить Все</button>
+            <button class="delete-all-btn" data-delete-all-btn>Удалить Выполненные</button>
         </div>
 
         <div class="container-todos" data-container-todos></div>
@@ -56,6 +58,7 @@
             <div class="todo-info">
                 <p class="todo-text" data-todo-text>Description</p>
                 <span class="todo-date" data-todo-date></span>
+                <span class="todo-important" data-todo-important></span>
             </div>
             <button class="remove-btn" data-remove-btn>🗑️</button>
         </div>
