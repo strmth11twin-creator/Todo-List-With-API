@@ -38,7 +38,7 @@ addBtn.addEventListener("click", () => {
             id: Date.now(),
             text: addInput.value,
             completed: false,
-            createdAt: new Date(),
+            createdAt: dateRepresentation(new Date()),
             important: select.value,
         }
 
@@ -49,6 +49,38 @@ addBtn.addEventListener("click", () => {
         saveToLocalStorage(todoList);
         render();
     }
+})
+
+containerTodos.addEventListener("dblclick", (e) => {
+    if(!e.target.classList.contains("todo-text")) return;
+
+    const input = document.createElement("input");
+    input.classList.add("redactor-input");
+
+    const id = Number(e.target.closest("[data-id]").dataset.id);
+
+    e.target.replaceWith(input);
+    input.value = e.target.textContent;
+
+    input.focus();
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            input.blur();
+        }
+    })
+
+    input.addEventListener("blur", () => {
+            todoList = todoList.map(t => t.id === id ? { ...t, text: input.value } : t)
+
+            if (searchInput.value.trim()) {
+                renderAndRenderFilteredTodos(searchInput.value.trim());
+            } else {
+                render();
+            }
+
+            saveToLocalStorage(todoList);
+    })
 })
 
 addInput.addEventListener("keydown", (e) => {
@@ -139,8 +171,19 @@ function circkl(important) {
     if (important === "Высокий") return "🔴 Высокий"
 }
 
+function dateRepresentation(newCreatedDate) {
+    return Intl.DateTimeFormat("UZ-uz", {
+        day: "numeric",
+        month: "numeric",
+        year: "numeric",
+    }).format(newCreatedDate);
+}
+
 function createdTodoLayout(todo) {
     const todoElement = document.importNode(todoTemplate.content, true);
+
+    const id = todoElement.querySelector("[data-todo-id]");
+    id.dataset.id = todo.id;
 
     const checkbox = todoElement.querySelector("[data-todo-checkbox]");
     checkbox.checked = todo.completed;
